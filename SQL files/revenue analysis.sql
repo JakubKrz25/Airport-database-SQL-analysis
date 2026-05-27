@@ -25,4 +25,22 @@ GROUP BY price_interval
 ORDER BY price_interval
 ;
 
+-- Next we find most profitable flights.
 
+SELECT
+	b.flight_id,
+	a1.city as departure_city,
+    a1.country as departure_country,
+    a2.city as destination_city,
+    a2.country as destination_country,
+    SUM(b.price) as revenue
+FROM booking b
+LEFT JOIN flight f
+	ON f.flight_id=b.flight_id
+LEFT JOIN  airport_geo a1
+	on a1.airport_id=f.from
+LEFT JOIN  airport_geo a2
+	on a2.airport_id=f.to
+GROUP BY b.flight_id, a1.city, a1.country, a2.city, a2.country
+ORDER BY revenue DESC
+LIMIT 10;

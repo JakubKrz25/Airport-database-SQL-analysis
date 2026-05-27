@@ -286,4 +286,56 @@ WHERE COALESCE(s.sold_seats, 0) > capacity
 ORDER BY occupancy_rate desc
 ;
 
+select * from airport_geo;
 
+
+-- Next we find the longest 10 flights.
+
+SELECT DISTINCT
+	ag1.city as departure_city,
+    ag1.country as departure_country,
+    ag2.city as destination_city,
+    ag2.country as destination_country,
+	timediff(f.arrival,f.departure) as flight_length
+FROM flight f
+INNER JOIN airport_geo ag1
+	ON ag1.airport_id=f.from
+INNER JOIN airport_geo ag2
+	ON ag2.airport_id=f.to
+ORDER BY flight_length DESC
+LIMIT 10;
+
+
+-- We find airlines with the most flights.
+SELECT
+	a.airlinename as airline_name,
+    COUNT(f.flight_id) as number_of_flights
+FROM flight f
+LEFT JOIN airline a
+	ON a.airline_id=f.airline_id
+GROUP BY a.airlinename
+ORDER BY number_of_flights DESC
+LIMIT 10;
+
+-- Next we find the average number of flight per day for each airline.
+
+WITH count_per_day as 
+			(
+			SELECT
+				f.airline_id,
+				date(f.departure) as date,
+				COUNT(f.departure) as number_of_flights
+			FROM flight f
+			GROUP BY f.airline_id, date
+			ORDER BY f.airline_id
+			)
+            
+SELECT
+	a.airlinename as airline_name,
+    FLOOR(AVG(c.number_of_flights)) as average_flights_number
+FROM count_per_day c
+LEFT JOIN airline a
+	ON a.airline_id=c.airline_id
+GROUP BY c.airline_id
+ORDER BY average_flights_number DESC
+LIMIT 10

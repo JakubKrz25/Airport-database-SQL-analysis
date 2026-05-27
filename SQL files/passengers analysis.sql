@@ -74,3 +74,37 @@ FROM
 ;
 -- We've managed to reduce the fetching time to 194sec (so aprox. by 9%).
 
+
+-- Next we find passengers that took the most flights.
+SELECT 
+	p.firstname as first_name,
+    p.lastname as last_name,
+    COUNT(*) AS number_of_flights
+FROM booking b
+LEFT JOIN passenger p
+	ON p.passenger_id=b.passenger_id
+GROUP BY b.passenger_id
+ORDER BY number_of_flights DESC
+LIMIT 10;
+
+-- Avg, min and max number of flights:
+
+WITH passengers_flights as 
+			(
+			SELECT 
+				passenger_id,
+				COUNT(*) AS number_of_flights
+			FROM booking 
+			GROUP BY passenger_id
+			)
+            
+
+SELECT 
+	FLOOR(AVG(number_of_flights)) as average_number_of_flights,
+    MIN(number_of_flights) as minimal_number_of_flights,
+    MAX(number_of_flights) as maximal_number_of_flights
+FROM passengers_flights;
+
+
+
+
