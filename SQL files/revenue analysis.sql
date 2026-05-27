@@ -44,3 +44,35 @@ LEFT JOIN  airport_geo a2
 GROUP BY b.flight_id, a1.city, a1.country, a2.city, a2.country
 ORDER BY revenue DESC
 LIMIT 10;
+
+-- This query took 1421 seconds- because we are joining huge "booking" table.
+-- We should first compute te most profitable flights and then join.
+
+
+WITH revenue AS
+			(
+			SELECT
+				flight_id,
+				SUM(price) as revenue
+			FROM booking
+			GROUP BY flight_id
+			ORDER BY revenue DESC
+			LIMIT 10
+			)
+            
+SELECT
+	r.flight_id,
+    a1.city as departure_city,
+    a1.country as departure_country,
+    a2.city as destination_city,
+    a2.country as destination_country,
+    r.revenue
+FROM revenue r
+LEFT JOIN flight f
+	ON f.flight_id=r.flight_id
+LEFT JOIN  airport_geo a1
+	on a1.airport_id=f.from
+LEFT JOIN  airport_geo a2
+	on a2.airport_id=f.to;
+    
+-- After opitmization query took only 507 second, so we reduced the execution time aprox. by 64%.
