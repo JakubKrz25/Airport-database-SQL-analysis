@@ -6,6 +6,27 @@ SELECT
 	CONCAT(ROUND(SUM(price)/1000000,2),' mln') as total_revenue
 FROM booking
 ;
+
+-- Now we are intrested in monthly revenue distribution.
+
+WITH monthly_revenue AS
+			(
+			SELECT
+				DATE_FORMAT(f.departure, "%Y-%m-01") AS month,
+				SUM(b.price) AS revenue
+			FROM flight f
+			JOIN booking b
+				ON b.flight_id=f.flight_id
+			GROUP BY month
+			ORDER BY month
+			)
+
+SELECT 
+	month,
+    revenue,
+	SUM(revenue) OVER (ORDER BY month) AS running_revenue
+FROM monthly_revenue
+;
 -- Now we are interested in average, minimal and maximal ticket price.
 
 SELECT

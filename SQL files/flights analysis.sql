@@ -339,3 +339,5 @@ LEFT JOIN airline a
 GROUP BY c.airline_id
 ORDER BY average_flights_number DESC
 LIMIT 10
+;
+

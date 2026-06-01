@@ -98,13 +98,57 @@ WITH passengers_flights as
 			GROUP BY passenger_id
 			)
             
-
+ 
 SELECT 
 	FLOOR(AVG(number_of_flights)) as average_number_of_flights,
     MIN(number_of_flights) as minimal_number_of_flights,
     MAX(number_of_flights) as maximal_number_of_flights
 FROM passengers_flights;
 
+-- Most frequent travelers
 
+WITH ranking AS
+			(
+			SELECT
+				passenger_id,
+				count(*) AS number_of_flights
+			FROM booking
+			GROUP BY passenger_id
+			ORDER BY number_of_flights DESC 
+			LIMIT 10
+			)
+            
+SELECT
+	p.firstname,
+    p.lastname,
+    r.number_of_flights
+FROM ranking r
+JOIN passenger p
+	ON r.passenger_id=p.passenger_id
+;
 
+-- Now we find passengers travelling to the largest number of countries
 
+WITH ranking AS
+			(
+			SELECT
+				b.passenger_id,
+				COUNT(ag.country) AS number_of_countries
+			FROM booking b
+			JOIN flight f
+				ON b.flight_id=f.flight_id
+			JOIN airport_geo ag
+				ON ag.airport_id=f.to
+			GROUP BY b.passenger_id
+            ORDER BY number_of_countries DESC
+            LIMIT 10
+			)
+            
+SELECT
+	p.firstname,
+    p.lastname,
+	r.number_of_countries
+FROM ranking r
+JOIN passenger p
+	ON r.passenger_id=p.passenger_id
+    
