@@ -97,3 +97,36 @@ LEFT JOIN  airport_geo a2
 	on a2.airport_id=f.to;
     
 -- After opitmization query took only 507 second, so we reduced the execution time aprox. by 64%.
+
+
+-- Now we look for the airlines that made the highest revenue.
+
+
+WITH revenue AS
+			(
+			SELECT
+				flight_id,
+				SUM(price) as revenue
+			FROM booking
+			GROUP BY flight_id
+			ORDER BY revenue DESC
+			LIMIT 10
+			),
+
+total_revenue AS
+			(	
+			SELECT 
+				f.airline_id,
+				SUM(r.revenue) AS total_revenue
+			FROM revenue r
+			LEFT JOIN flight f
+				ON f.flight_id=r.flight_id
+			GROUP BY f.airline_id
+			)
+            
+SELECT
+	a.airlinename,
+    tr.total_revenue
+FROM total_revenue tr
+LEFT JOIN airline a
+	ON a.airline_id=tr.airline_id
